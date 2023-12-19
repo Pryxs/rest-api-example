@@ -1,10 +1,5 @@
-export type Product = {
-    id: number;
-    title: string;
-    year: number;
-    desc: string;
-    price: number;
-    color: string;
+export type IResponse<TData> = {
+    data: TData
+} | {
+    error: string;
 }
-
-export type Products = Product[]

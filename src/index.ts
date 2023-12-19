@@ -1,70 +1,80 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
-import connect from './connect'
-import { Product } from "./resources/products/prdocuts.model";
+import dbConnect from './utils/dbConnect'
+import { Product, Products } from "./resources/products/prdocuts.model";
+import type { IResponse } from "./types";
 
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT || 3000;
+const port: string = process.env.PORT || '3000';
 
-connect()
+dbConnect()
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json());
 
-app.get('/products', async (req: Request, res: Response) => {
+app.get('/products', async (req: Request, res: Response<IResponse<Products>>) => {
     try {
         const products = await Product.find().select('-__v')
 
-        res.send(products);
+        res.status(200).json({ data: products })
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json({ error: 'Internal server error' })
     }
 });
 
-app.get('/products/:id', async (req: Request<{ id: string }>, res: Response) => {
+app.get('/products/:id', async (req: Request<{ id: string }>, res: Response<IResponse<Product>>) => {
     const { id } = req.params;
 
     try {
-        const products = await Product.findOne({ _id: id }).select('-__v')
+        const product = await Product.findOne({ _id: id }).select('-__v')
 
-        res.send(products);
+        if (!product) return res.status(404).json({ error: 'Product not found' })
+
+        res.status(200).json({ data: product })
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json({ error: 'Internal server error' })
     }
 });
 
-app.post('/products', async (req: Request, res: Response) => {
+
+app.post('/products', async (req: Request<{}, {}, Omit<Product, 'id'>>, res: Response<IResponse<Product>>) => {
     try {
         const product = new Product(req.body)
         product.save();
-        res.send(product);
+
+        res.status(201).json({ data: product })
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json({ error: 'Internal server error' })
     }
 });
 
-app.put('/products/:id', async (req: Request, res: Response) => {
+app.put('/products/:id', async (req: Request<{ id: string }>, res: Response<IResponse<Product>>) => {
     const { id } = req.params;
 
     try {
         const product = await Product.findByIdAndUpdate(id, req.body)
-        res.send(product);
+
+        if (!product) return res.status(404).json({ error: 'Product not found' })
+
+        res.status(200).json({ data: product })
     } catch (err) {
-        throw 'Failed to update product';
+        res.status(500).json({ error: 'Internal server error' })
     }
 
 })
 
-app.delete('/products/:id', async (req: Request, res: Response) => {
+app.delete('/products/:id', async (req: Request<{ id: string }>, res: Response<IResponse<{ id: string }>>) => {
     const { id } = req.params;
 
     try {
-        const product = await Product.deleteOne({ _id: id })
-        res.send(product);
+        await Product.deleteOne({ _id: id })
+
+        res.status(200).json({ data: { id } })
     } catch (err) {
-        throw 'Failed to delete product';
+
+        res.status(500).json({ error: 'Internal server error' })
     }
 })
 

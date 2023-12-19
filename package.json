@@ -2,7 +2,7 @@
   "name": "rest-api-example",
   "version": "1.0.0",
   "description": "a simple rest api with express",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/index.js",

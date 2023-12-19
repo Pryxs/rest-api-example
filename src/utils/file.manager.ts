@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import type { Products, Product } from "../types";
+import type { Products, Product } from "../resources/products/prdocuts.model";
 
 
 export const FileManager = () => {
