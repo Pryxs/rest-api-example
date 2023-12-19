@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 
-export type Product = {
+export type IProduct = {
     id: number;
     title: string;
     year: number;
@@ -9,15 +9,15 @@ export type Product = {
     color: string;
 }
 
-export type Products = Product[]
-
-const productSchema = new Schema<Product>({
+const productSchema = new Schema<IProduct>({
     id: Number,
     title: String,
     year: Number,
     desc: String,
     price: Number,
     color: String,
+}, {
+    versionKey: false
 })
 
-export const Product = model<Product>('product', productSchema)
+export const Product = model<IProduct>('product', productSchema)
